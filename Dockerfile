@@ -13,15 +13,16 @@ RUN create-user bitcoind $APP_ROOT
 WORKDIR $APP_ROOT
 VOLUME /data
 
+COPY $BITCOIN_CORE_TGZ .
 COPY bitcoin.conf .bitcoin/
 
 RUN echo "Downloading Bitcoin Core…" && \
-    wget -nv ${BITCOIN_CORE} ${BITCOIN_CORE_SIGS} && \
+    aria2c ${BITCOIN_CORE_SIGS} && \
     gpg-recv-key $RELEASE_GPG_KEY && \
     echo "$RELEASE_GPG_KEY:6:" | gpg --import-ownertrust && \
     gpg --verify SHA256SUMS.asc && \ 
     tar xf ${BITCOIN_CORE_TGZ} --strip 1 && \
-    rm ${BITCOIN_CORE_TGZ} SHA256SUMS.asc laanwj-releases.asc && \
+    rm ${BITCOIN_CORE_TGZ} SHA256SUMS.asc && \
     rm -rf /root/.gnupg
 
 USER bitcoind
